@@ -110,67 +110,62 @@ frame.pack(pady=20, padx=20, fill="both", expand=True)
 label = customtkinter.CTkLabel(master=frame, text="Base", font=("roboto", 24))
 label.pack(pady=12, padx=10)
 
-surname_dropdown = None
-name_dropdown = None
-otchestvo_dropdown = None
-street_dropdown = None
-house_number = None
-korpus_number = None
-flat_number = None
-phone_number = None
-def dropdown_generator():
-    # do a dropdown menu of surnames
-    selected_surname = customtkinter.StringVar()
+# do a dropdown menu of surnames
+selected_surname = customtkinter.StringVar()
+
+surname_dropdown = customtkinter.CTkComboBox(master=frame,
+                                                variable=selected_surname, values=get_surnames())
+surname_dropdown.place(relx=0.1, rely=0.15)
+
+# do a dropdown menu of names
+selected_name = customtkinter.StringVar()
+
+name_dropdown = customtkinter.CTkComboBox(master=frame,
+                                            variable=selected_name, values=get_names())
+name_dropdown.place(relx=0.33, rely=0.15)
+
+# do a dropdown menu of otchestva
+selected_otchestvo = customtkinter.StringVar()
+
+otchestvo_dropdown = customtkinter.CTkComboBox(master=frame,
+                                                variable=selected_otchestvo, values=get_otchestva())
+otchestvo_dropdown.place(relx=0.57, rely=0.15)
+
+# do a dropdown menu of streets
+selected_street = customtkinter.StringVar()
+
+street_dropdown = customtkinter.CTkComboBox(master=frame,
+                                            variable=selected_street, values=get_streets())
+# place it in the next row
+street_dropdown.place(relx=0.8, rely=0.15)
+
+# do a text field for house number
+house_number = customtkinter.CTkEntry(
+    master=frame, placeholder_text="House number")
+house_number.place(relx=0.1, rely=0.3)
+
+# do a text field for korpus
+korpus_number = customtkinter.CTkEntry(
+    master=frame, placeholder_text="Korpus")
+korpus_number.place(relx=0.33, rely=0.3)
+
+# do a text field for flat
+flat_number = customtkinter.CTkEntry(master=frame, placeholder_text="Flat")
+flat_number.place(relx=0.57, rely=0.3)
+
+# do a text field for phone number
+phone_number = customtkinter.CTkEntry(
+    master=frame, placeholder_text="Phone number")
+phone_number.place(relx=0.8, rely=0.3)
+
+
+def dropdown_fill():
     selected_surname.set("Select surname")
-
-    surname_dropdown = customtkinter.CTkComboBox(master=frame,
-                                                 variable=selected_surname, values=get_surnames())
-    surname_dropdown.place(relx=0.1, rely=0.15)
-
-    # do a dropdown menu of names
-    selected_name = customtkinter.StringVar()
     selected_name.set("Select name")
-
-    name_dropdown = customtkinter.CTkComboBox(master=frame,
-                                              variable=selected_name, values=get_names())
-    name_dropdown.place(relx=0.33, rely=0.15)
-
-    # do a dropdown menu of otchestva
-    selected_otchestvo = customtkinter.StringVar()
     selected_otchestvo.set("Select otchestvo")
-
-    otchestvo_dropdown = customtkinter.CTkComboBox(master=frame,
-                                                   variable=selected_otchestvo, values=get_otchestva())
-    otchestvo_dropdown.place(relx=0.57, rely=0.15)
-
-    # do a dropdown menu of streets
-    selected_street = customtkinter.StringVar()
     selected_street.set("Select street")
 
-    street_dropdown = customtkinter.CTkComboBox(master=frame,
-                                                variable=selected_street, values=get_streets())
-    # place it in the next row
-    street_dropdown.place(relx=0.8, rely=0.15)
-
-    # do a text field for house number
-    house_number = customtkinter.CTkEntry(
-        master=frame, placeholder_text="House number")
-    house_number.place(relx=0.1, rely=0.3)
-
-    # do a text field for korpus
-    korpus_number = customtkinter.CTkEntry(
-        master=frame, placeholder_text="Korpus")
-    korpus_number.place(relx=0.33, rely=0.3)
-
-    # do a text field for flat
-    flat_number = customtkinter.CTkEntry(master=frame, placeholder_text="Flat")
-    flat_number.place(relx=0.57, rely=0.3)
-
-    # do a text field for phone number
-    phone_number = customtkinter.CTkEntry(
-        master=frame, placeholder_text="Phone number")
-    phone_number.place(relx=0.8, rely=0.3)
-dropdown_generator()
+dropdown_fill()
 
 
 # do a button to add a new person
@@ -257,7 +252,7 @@ def add_person():
     flat_number.delete(0, "end")
     phone_number.delete(0, "end")
 
-    dropdown_generator()
+    dropdown_fill()
     popupmsg("Person added")
 
 
@@ -295,6 +290,7 @@ textbox.place(relx=0.5, rely=0.95, anchor="s")
 
 # create a button to show all the people
 def show_people():
+    textbox.configure(state="normal")
     with connection.cursor() as cursor:
         cursor.execute("SELECT * FROM main")
         people = cursor.fetchall()
@@ -334,6 +330,8 @@ def show_people():
             spacesAfterFlat = 10 - len(str(people[i][7]))
 
             textbox.insert("end", f"{surname} {name} {otchestvo} {street} {people[i][5]} {people[i][6]} {people[i][7]}" + spacesAfterFlat*" " + f"{people[i][8]}\n")
+    
+    textbox.configure(state="disabled")
 
 
 show_people_button = customtkinter.CTkButton(
