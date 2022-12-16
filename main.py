@@ -336,7 +336,112 @@ def show_people():
 
 show_people_button = customtkinter.CTkButton(
     master=frame, text="Show all", command=show_people)
-show_people_button.place(relx=0.33, rely=0.45)
+show_people_button.place(relx=0.57, rely=0.45)
+
+# create search button
+def search():
+    textbox.configure(state="normal")
+    textbox.delete(1.0, "end")
+    surname = surname_dropdown.get()
+    name = name_dropdown.get()
+    otchestvo = otchestvo_dropdown.get()
+    street = street_dropdown.get()
+    house = house_number.get()
+    korpus = korpus_number.get()
+    flat = flat_number.get()
+    phone = phone_number.get()
+
+    # if all the fields are empty show popup message
+    if surname == "Select surname" and name == "Select name" and otchestvo == "Select otchestvo" and street == "Select street" and house == "" and korpus == "" and flat == "" and phone == "":
+        popupmsg("Fill at least one field")
+        return
+
+    with connection.cursor() as cursor:
+        # get the id of the surname from fam table
+        cursor.execute(f"SELECT f_id FROM fam WHERE f_val = '{surname}'")
+        surname_id = cursor.fetchall()
+        surname_id = surname_id[0][0] if len(surname_id) > 0 else 0
+
+        # get the id of the name from names table
+        cursor.execute(f"SELECT n_id FROM names WHERE n_val = '{name}'")
+        name_id = cursor.fetchall()
+        name_id = name_id[0][0] if len(name_id) > 0 else 0
+
+        # get the id of the otchestvo from otch table
+        cursor.execute(f"SELECT o_id FROM otch WHERE o_value = '{otchestvo}'")
+        otchestvo_id = cursor.fetchall()
+        otchestvo_id = otchestvo_id[0][0] if len(otchestvo_id) > 0 else 0
+
+        # get the id of the street from street table
+        cursor.execute(f"SELECT s_id FROM street WHERE s_val = '{street}'")
+        street_id = cursor.fetchall()
+        street_id = street_id[0][0] if len(street_id) > 0 else 0
+
+        request = "SELECT * FROM main WHERE "
+        request += f"fam={surname_id}" if surname != "Select surname" else ""
+        request += " AND " if surname != "Select surname" and name != "Select name" else ""
+        request += f"name={name_id}" if name != "Select name" else ""
+        request += " AND " if surname != "Select surname" and name != "Select name" and otchestvo != "Select otchestvo" else ""
+        request += f"otchestvo={otchestvo_id}" if otchestvo != "Select otchestvo" else ""
+        request += " AND " if surname != "Select surname" and name != "Select name" and otchestvo != "Select otchestvo" and street != "Select street" else ""
+        request += f"street={street_id}" if street != "Select street" else ""
+        request += " AND " if surname != "Select surname" and name != "Select name" and otchestvo != "Select otchestvo" and street != "Select street" and house != "" else ""
+        request += f"dom='{house}'" if house != "" else ""
+        request += " AND " if surname != "Select surname" and name != "Select name" and otchestvo != "Select otchestvo" and street != "Select street" and house != "" and korpus != "" else ""
+        request += f"korpus='{korpus}'" if korpus != "" else ""
+        request += " AND " if surname != "Select surname" and name != "Select name" and otchestvo != "Select otchestvo" and street != "Select street" and house != "" and korpus != "" and flat != "" else ""
+        request += f"kvartira={flat}" if flat != "" else ""
+        request += " AND " if surname != "Select surname" and name != "Select name" and otchestvo != "Select otchestvo" and street != "Select street" and house != "" and korpus != "" and flat != "" and phone != "" else ""
+        request += f"telephone='{phone}'" if phone != "" else ""
+        print(request)
+        
+        cursor.execute(request)
+        peopleFound = cursor.fetchall()
+        if len(peopleFound) == 0:
+            popupmsg("No results found")
+            return
+
+        surnames = get_surnames2()
+        names = get_names2()
+        otchestva = get_otchestva2()
+        streets = get_streets2()
+
+        textbox.delete(1.0, "end")
+        for i in range(len(peopleFound)):
+            surname = ""
+            for j in range(len(surnames)):
+                if surnames[j][0] == peopleFound[i][1]:
+                    surname = surnames[j][1]
+                    
+            name = ""
+            for j in range(len(names)):
+                if names[j][0] == peopleFound[i][2]:
+                    name = names[j][1]
+                    
+            otchestvo = ""
+            for j in range(len(otchestva)):
+                if otchestva[j][0] == peopleFound[i][3]:
+                    otchestvo = otchestva[j][1]
+                    
+            street = ""
+            for j in range(len(streets)):
+                if streets[j][0] == peopleFound[i][4]:
+                    street = streets[j][1]
+
+            surname = surname.ljust(15)
+            name = name.ljust(15)
+            otchestvo = otchestvo.ljust(17)
+            street = street.ljust(20)
+            
+            spacesAfterFlat = 10 - len(str(peopleFound[i][7]))
+            textbox.insert("end", f"{surname} {name} {otchestvo} {street} {peopleFound[i][5]} {peopleFound[i][6]} {peopleFound[i][7]}" + spacesAfterFlat*" " + f"{peopleFound[i][8]}\n")
+    textbox.configure(state="disabled")
+    dropdown_fill()
+
+search_button = customtkinter.CTkButton(
+    master=frame, text="Search", command=search)
+search_button.place(relx=0.33, rely=0.45)
+
 
 root.mainloop()
 

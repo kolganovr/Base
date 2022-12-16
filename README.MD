@@ -35,9 +35,9 @@ This code connects to a PostgreSQL database, gets data from four different table
 
 - Can add information about a person to the database.
 
-- *(In progress) Can search for a person in the database.*
+- Can search for a person in the database.
 
-- *(In progress) Can show a list of all people in the database.*
+- Can show a list of all people in the database.
 
 - *(In progress) Can delete a person from the database.*
 
