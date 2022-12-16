@@ -34,9 +34,15 @@ def get_surnames():
         surnames = [surname.strip() for surname in surnames]
         return surnames
 
+def get_surnames2():
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT f_id, f_val FROM fam")
+        surnames = cursor.fetchall()
+        # delete all spaces after each surname and save f_id and f_val
+        surnames = [(surname[0], surname[1].strip()) for surname in surnames]
+        return surnames
+
 # get the list of names from the database
-
-
 def get_names():
     with connection.cursor() as cursor:
         cursor.execute("SELECT n_val FROM names")
@@ -46,9 +52,15 @@ def get_names():
         names = [name.strip() for name in names]
         return names
 
+def get_names2():
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT n_id, n_val FROM names")
+        names = cursor.fetchall()
+        # delete all spaces after each name and save n_id and n_val
+        names = [(name[0], name[1].strip()) for name in names]
+        return names
+
 # get the list of otchestva from the database
-
-
 def get_otchestva():
     with connection.cursor() as cursor:
         cursor.execute("SELECT o_value FROM otch")
@@ -58,9 +70,15 @@ def get_otchestva():
         otchestva = [otchestvo.strip() for otchestvo in otchestva]
         return otchestva
 
+def get_otchestva2():
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT o_id, o_value FROM otch")
+        otchestva = cursor.fetchall()
+        # delete all spaces after each otchestvo and save o_id and o_value
+        otchestva = [(otchestvo[0], otchestvo[1].strip()) for otchestvo in otchestva]
+        return otchestva
+
 # get the list of streets from the database
-
-
 def get_streets():
     with connection.cursor() as cursor:
         cursor.execute("SELECT s_val FROM street")
@@ -68,6 +86,14 @@ def get_streets():
         streets = [street[0] for street in streets]
         # delete all spaces after each street
         streets = [street.strip() for street in streets]
+        return streets
+
+def get_streets2():
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT s_id, s_val FROM street")
+        streets = cursor.fetchall()
+        # delete all spaces after each street and save s_id and s_val
+        streets = [(street[0], street[1].strip()) for street in streets]
         return streets
 
 
@@ -84,56 +110,67 @@ frame.pack(pady=20, padx=20, fill="both", expand=True)
 label = customtkinter.CTkLabel(master=frame, text="Base", font=("roboto", 24))
 label.pack(pady=12, padx=10)
 
-# do a dropdown menu of surnames
-selected_surname = customtkinter.StringVar()
-selected_surname.set("Select surname")
+surname_dropdown = None
+name_dropdown = None
+otchestvo_dropdown = None
+street_dropdown = None
+house_number = None
+korpus_number = None
+flat_number = None
+phone_number = None
+def dropdown_generator():
+    # do a dropdown menu of surnames
+    selected_surname = customtkinter.StringVar()
+    selected_surname.set("Select surname")
 
-surname_dropdown = customtkinter.CTkComboBox(master=frame,
-                                             variable=selected_surname, values=get_surnames())
-surname_dropdown.place(relx=0.1, rely=0.15)
+    surname_dropdown = customtkinter.CTkComboBox(master=frame,
+                                                 variable=selected_surname, values=get_surnames())
+    surname_dropdown.place(relx=0.1, rely=0.15)
 
-# do a dropdown menu of names
-selected_name = customtkinter.StringVar()
-selected_name.set("Select name")
+    # do a dropdown menu of names
+    selected_name = customtkinter.StringVar()
+    selected_name.set("Select name")
 
-name_dropdown = customtkinter.CTkComboBox(master=frame,
-                                          variable=selected_name, values=get_names())
-name_dropdown.place(relx=0.33, rely=0.15)
+    name_dropdown = customtkinter.CTkComboBox(master=frame,
+                                              variable=selected_name, values=get_names())
+    name_dropdown.place(relx=0.33, rely=0.15)
 
-# do a dropdown menu of otchestva
-selected_otchestvo = customtkinter.StringVar()
-selected_otchestvo.set("Select otchestvo")
+    # do a dropdown menu of otchestva
+    selected_otchestvo = customtkinter.StringVar()
+    selected_otchestvo.set("Select otchestvo")
 
-otchestvo_dropdown = customtkinter.CTkComboBox(master=frame,
-                                               variable=selected_otchestvo, values=get_otchestva())
-otchestvo_dropdown.place(relx=0.57, rely=0.15)
+    otchestvo_dropdown = customtkinter.CTkComboBox(master=frame,
+                                                   variable=selected_otchestvo, values=get_otchestva())
+    otchestvo_dropdown.place(relx=0.57, rely=0.15)
 
-# do a dropdown menu of streets
-selected_street = customtkinter.StringVar()
-selected_street.set("Select street")
+    # do a dropdown menu of streets
+    selected_street = customtkinter.StringVar()
+    selected_street.set("Select street")
 
-street_dropdown = customtkinter.CTkComboBox(master=frame,
-                                            variable=selected_street, values=get_streets())
-# place it in the next row
-street_dropdown.place(relx=0.8, rely=0.15)
+    street_dropdown = customtkinter.CTkComboBox(master=frame,
+                                                variable=selected_street, values=get_streets())
+    # place it in the next row
+    street_dropdown.place(relx=0.8, rely=0.15)
 
-# do a text field for house number
-house_number = customtkinter.CTkEntry(
-    master=frame, placeholder_text="House number")
-house_number.place(relx=0.1, rely=0.3)
+    # do a text field for house number
+    house_number = customtkinter.CTkEntry(
+        master=frame, placeholder_text="House number")
+    house_number.place(relx=0.1, rely=0.3)
 
-# do a text field for korpus
-korpus_number = customtkinter.CTkEntry(master=frame, placeholder_text="Korpus")
-korpus_number.place(relx=0.33, rely=0.3)
+    # do a text field for korpus
+    korpus_number = customtkinter.CTkEntry(
+        master=frame, placeholder_text="Korpus")
+    korpus_number.place(relx=0.33, rely=0.3)
 
-# do a text field for flat
-flat_number = customtkinter.CTkEntry(master=frame, placeholder_text="Flat")
-flat_number.place(relx=0.57, rely=0.3)
+    # do a text field for flat
+    flat_number = customtkinter.CTkEntry(master=frame, placeholder_text="Flat")
+    flat_number.place(relx=0.57, rely=0.3)
 
-# do a text field for phone number
-phone_number = customtkinter.CTkEntry(
-    master=frame, placeholder_text="Phone number")
-phone_number.place(relx=0.8, rely=0.3)
+    # do a text field for phone number
+    phone_number = customtkinter.CTkEntry(
+        master=frame, placeholder_text="Phone number")
+    phone_number.place(relx=0.8, rely=0.3)
+dropdown_generator()
 
 
 # do a button to add a new person
@@ -206,7 +243,6 @@ def add_person():
         cursor.execute(f"SELECT s_id FROM street WHERE s_val = '{street}'")
         street_id = cursor.fetchone()[0]
 
-        # insert into main values(default, 3, 3, 3, 3, '15', '1', 29, '89169735699')
         cursor.execute(
             f"INSERT INTO main VALUES (default, {surname_id}, {name_id}, {otchestvo_id}, {street_id}, '{house}', '{korpus}', {flat}, '{phone}')")
 
@@ -221,6 +257,7 @@ def add_person():
     flat_number.delete(0, "end")
     phone_number.delete(0, "end")
 
+    dropdown_generator()
     popupmsg("Person added")
 
 
@@ -252,11 +289,56 @@ add_person_button.place(relx=0.1, rely=0.45)
 
 
 # create a textbox to show all the people
-textbox = customtkinter.CTkTextbox(master=frame, width=1000, height=250)
+textbox = customtkinter.CTkTextbox(
+    master=frame, width=1000, height=250, font=("Consolas", 14))
 textbox.place(relx=0.5, rely=0.95, anchor="s")
 
-# create a button to search for people
+# create a button to show all the people
+def show_people():
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM main")
+        people = cursor.fetchall()
 
+        surnames = get_surnames2()
+        names = get_names2()
+        otchestva = get_otchestva2()
+        streets = get_streets2()
+
+        textbox.delete(1.0, "end")
+        for i in range(len(people)):
+            surname = ""
+            for j in range(len(surnames)):
+                if surnames[j][0] == people[i][1]:
+                    surname = surnames[j][1]
+                    
+            name = ""
+            for j in range(len(names)):
+                if names[j][0] == people[i][2]:
+                    name = names[j][1]
+                    
+            otchestvo = ""
+            for j in range(len(otchestva)):
+                if otchestva[j][0] == people[i][3]:
+                    otchestvo = otchestva[j][1]
+                    
+            street = ""
+            for j in range(len(streets)):
+                if streets[j][0] == people[i][4]:
+                    street = streets[j][1]
+
+            surname = surname.ljust(15)
+            name = name.ljust(15)
+            otchestvo = otchestvo.ljust(17)
+            street = street.ljust(20)
+            
+            spacesAfterFlat = 10 - len(str(people[i][7]))
+
+            textbox.insert("end", f"{surname} {name} {otchestvo} {street} {people[i][5]} {people[i][6]} {people[i][7]}" + spacesAfterFlat*" " + f"{people[i][8]}\n")
+
+
+show_people_button = customtkinter.CTkButton(
+    master=frame, text="Show all", command=show_people)
+show_people_button.place(relx=0.33, rely=0.45)
 
 root.mainloop()
 
