@@ -24,17 +24,7 @@ except (Exception, Error) as error:
     print("Error while connecting to PostgreSQL", error)
 
 
-# get the list of surnames from the database
 def get_surnames():
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT f_val FROM fam")
-        surnames = cursor.fetchall()
-        surnames = [surname[0] for surname in surnames]
-        # delete all spaces after each surname
-        surnames = [surname.strip() for surname in surnames]
-        return surnames
-
-def get_surnames2():
     with connection.cursor() as cursor:
         cursor.execute("SELECT f_id, f_val FROM fam")
         surnames = cursor.fetchall()
@@ -42,17 +32,7 @@ def get_surnames2():
         surnames = [(surname[0], surname[1].strip()) for surname in surnames]
         return surnames
 
-# get the list of names from the database
 def get_names():
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT n_val FROM names")
-        names = cursor.fetchall()
-        names = [name[0] for name in names]
-        # delete all spaces after each name
-        names = [name.strip() for name in names]
-        return names
-
-def get_names2():
     with connection.cursor() as cursor:
         cursor.execute("SELECT n_id, n_val FROM names")
         names = cursor.fetchall()
@@ -60,17 +40,7 @@ def get_names2():
         names = [(name[0], name[1].strip()) for name in names]
         return names
 
-# get the list of otchestva from the database
 def get_otchestva():
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT o_value FROM otch")
-        otchestva = cursor.fetchall()
-        otchestva = [otchestvo[0] for otchestvo in otchestva]
-        # delete all spaces after each otchestvo
-        otchestva = [otchestvo.strip() for otchestvo in otchestva]
-        return otchestva
-
-def get_otchestva2():
     with connection.cursor() as cursor:
         cursor.execute("SELECT o_id, o_value FROM otch")
         otchestva = cursor.fetchall()
@@ -78,17 +48,7 @@ def get_otchestva2():
         otchestva = [(otchestvo[0], otchestvo[1].strip()) for otchestvo in otchestva]
         return otchestva
 
-# get the list of streets from the database
 def get_streets():
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT s_val FROM street")
-        streets = cursor.fetchall()
-        streets = [street[0] for street in streets]
-        # delete all spaces after each street
-        streets = [street.strip() for street in streets]
-        return streets
-
-def get_streets2():
     with connection.cursor() as cursor:
         cursor.execute("SELECT s_id, s_val FROM street")
         streets = cursor.fetchall()
@@ -114,28 +74,28 @@ label.pack(pady=12, padx=10)
 selected_surname = customtkinter.StringVar()
 
 surname_dropdown = customtkinter.CTkComboBox(master=frame,
-                                                variable=selected_surname, values=get_surnames())
+                                                variable=selected_surname)
 surname_dropdown.place(relx=0.1, rely=0.15)
 
 # do a dropdown menu of names
 selected_name = customtkinter.StringVar()
 
 name_dropdown = customtkinter.CTkComboBox(master=frame,
-                                            variable=selected_name, values=get_names())
+                                            variable=selected_name)
 name_dropdown.place(relx=0.33, rely=0.15)
 
 # do a dropdown menu of otchestva
 selected_otchestvo = customtkinter.StringVar()
 
 otchestvo_dropdown = customtkinter.CTkComboBox(master=frame,
-                                                variable=selected_otchestvo, values=get_otchestva())
+                                                variable=selected_otchestvo)
 otchestvo_dropdown.place(relx=0.57, rely=0.15)
 
 # do a dropdown menu of streets
 selected_street = customtkinter.StringVar()
 
 street_dropdown = customtkinter.CTkComboBox(master=frame,
-                                            variable=selected_street, values=get_streets())
+                                            variable=selected_street)
 # place it in the next row
 street_dropdown.place(relx=0.8, rely=0.15)
 
@@ -165,10 +125,33 @@ def dropdown_fill():
     selected_otchestvo.set("Select otchestvo")
     selected_street.set("Select street")
 
-    surname_dropdown.configure(values=get_surnames())
-    name_dropdown.configure(values=get_names())
-    otchestvo_dropdown.configure(values=get_otchestva())
-    street_dropdown.configure(values=get_streets())
+    # write into surnames variable the list of f_val from get_surnames2()
+    surnamesWId = get_surnames()
+    surnames = []
+    for surname in surnamesWId:
+        surnames.append(surname[1])
+    surname_dropdown.configure(values=surnames)
+
+    # write into names variable the list of n_val from get_names2()
+    namesWId = get_names()
+    names = []
+    for name in namesWId:
+        names.append(name[1])
+    name_dropdown.configure(values=names)
+    
+    # write into otchestva variable the list of o_val from get_otchestva2()
+    otchestvaWId = get_otchestva()
+    otchestva = []
+    for otchestvo in otchestvaWId:
+        otchestva.append(otchestvo[1])
+    otchestvo_dropdown.configure(values=otchestva)
+    
+    # write into streets variable the list of s_val from get_streets2()
+    streetsWId = get_streets()
+    streets = []
+    for street in streetsWId:
+        streets.append(street[1])
+    street_dropdown.configure(values=streets)
 
 dropdown_fill()
 
@@ -300,10 +283,10 @@ def show_people():
         cursor.execute("SELECT * FROM main")
         people = cursor.fetchall()
 
-        surnames = get_surnames2()
-        names = get_names2()
-        otchestva = get_otchestva2()
-        streets = get_streets2()
+        surnames = get_surnames()
+        names = get_names()
+        otchestva = get_otchestva()
+        streets = get_streets()
 
         textbox.delete(1.0, "end")
         for i in range(len(people)):
@@ -388,17 +371,17 @@ def search():
         request += f"fam={surname_id}" if surname != "Select surname" else ""
         request += " AND " if surname != "Select surname" and name != "Select name" else ""
         request += f"name={name_id}" if name != "Select name" else ""
-        request += " AND " if surname != "Select surname" and name != "Select name" and otchestvo != "Select otchestvo" else ""
+        request += " AND " if (surname != "Select surname" or name != "Select name") and otchestvo != "Select otchestvo" else ""
         request += f"otchestvo={otchestvo_id}" if otchestvo != "Select otchestvo" else ""
-        request += " AND " if surname != "Select surname" and name != "Select name" and otchestvo != "Select otchestvo" and street != "Select street" else ""
+        request += " AND " if (surname != "Select surname" or name != "Select name" or otchestvo != "Select otchestvo") and street != "Select street" else ""
         request += f"street={street_id}" if street != "Select street" else ""
-        request += " AND " if surname != "Select surname" and name != "Select name" and otchestvo != "Select otchestvo" and street != "Select street" and house != "" else ""
+        request += " AND " if (surname != "Select surname" or name != "Select name" or otchestvo != "Select otchestvo" or street != "Select street") and house != "" else ""
         request += f"dom='{house}'" if house != "" else ""
-        request += " AND " if surname != "Select surname" and name != "Select name" and otchestvo != "Select otchestvo" and street != "Select street" and house != "" and korpus != "" else ""
+        request += " AND " if (surname != "Select surname" or name != "Select name" or otchestvo != "Select otchestvo" or street != "Select street" or house != "") and korpus != "" else ""
         request += f"korpus='{korpus}'" if korpus != "" else ""
-        request += " AND " if surname != "Select surname" and name != "Select name" and otchestvo != "Select otchestvo" and street != "Select street" and house != "" and korpus != "" and flat != "" else ""
+        request += " AND " if (surname != "Select surname" or name != "Select name" or otchestvo != "Select otchestvo" or street != "Select street" or house != "" or korpus != "") and flat != "" else ""
         request += f"kvartira={flat}" if flat != "" else ""
-        request += " AND " if surname != "Select surname" and name != "Select name" and otchestvo != "Select otchestvo" and street != "Select street" and house != "" and korpus != "" and flat != "" and phone != "" else ""
+        request += " AND " if (surname != "Select surname" or name != "Select name" or otchestvo != "Select otchestvo" or street != "Select street" or house != "" or korpus != "" or flat != "") and phone != "" else ""
         request += f"telephone='{phone}'" if phone != "" else ""
         print(request)
         
@@ -408,10 +391,10 @@ def search():
             popupmsg("No results found")
             return
 
-        surnames = get_surnames2()
-        names = get_names2()
-        otchestva = get_otchestva2()
-        streets = get_streets2()
+        surnames = get_surnames()
+        names = get_names()
+        otchestva = get_otchestva()
+        streets = get_streets()
 
         textbox.delete(1.0, "end")
         for i in range(len(peopleFound)):
