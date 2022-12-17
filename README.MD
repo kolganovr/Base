@@ -16,6 +16,14 @@ This code connects to a PostgreSQL database, gets data from four different table
 
 2. Run the code using `python main.py`.
 
+3. To **add** a person to the database, fill in all the fields and click the `Add` button.
+
+4. To **search** for a person in the database, fill in at least one field and click the `Search` button (To show a list of all people in the database, just click the `Search` button without entering any data).
+
+5. To **delete** a person from the database, serach for the person (at least one) and click the `Delete` button.
+
+6. To **update** a person's information in the database, search for the person, click `Edit`, and then edit in the fields you want to update and click the `Save` button. To cancel the update, click the `Cancel` button.
+
 ## Features
 
 - Connects to a PostgreSQL database using the `psycopg2` library.

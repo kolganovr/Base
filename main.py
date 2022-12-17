@@ -436,7 +436,6 @@ def delete():
     global peopleFounded
     global textbox
     global connection
-    global surname_entry, name_entry, otchestvo_entry, street_entry, house_entry, korpus_entry, flat_entry, phone_entry
 
     if len(peopleFounded) == 0:
         popupmsg("No results found")
@@ -475,6 +474,27 @@ def delete():
             surname_id_used = cursor.fetchall()
             if len(surname_id_used) == 0:
                 cursor.execute(f"DELETE FROM fam WHERE f_id={surname_id}")
+                connection.commit()
+            
+            # delete person name from names table if it is not used anymore
+            cursor.execute(f"SELECT * FROM main WHERE name={name_id}")
+            name_id_used = cursor.fetchall()
+            if len(name_id_used) == 0:
+                cursor.execute(f"DELETE FROM names WHERE n_id={name_id}")
+                connection.commit()
+            
+            # delete person otchestvo from otch table if it is not used anymore
+            cursor.execute(f"SELECT * FROM main WHERE otchestvo={otchestvo_id}")
+            otchestvo_id_used = cursor.fetchall()
+            if len(otchestvo_id_used) == 0:
+                cursor.execute(f"DELETE FROM otch WHERE o_id={otchestvo_id}")
+                connection.commit()
+            
+            # delete person street from street table if it is not used anymore
+            cursor.execute(f"SELECT * FROM main WHERE street={street_id}")
+            street_id_used = cursor.fetchall()
+            if len(street_id_used) == 0:
+                cursor.execute(f"DELETE FROM street WHERE s_id={street_id}")
                 connection.commit()
 
     textbox.configure(state="normal")
