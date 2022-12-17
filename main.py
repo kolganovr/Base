@@ -67,7 +67,7 @@ root.geometry("1280x720")
 frame = customtkinter.CTkFrame(master=root)
 frame.pack(pady=20, padx=20, fill="both", expand=True)
 
-label = customtkinter.CTkLabel(master=frame, text="Base", font=("roboto", 24))
+label = customtkinter.CTkLabel(master=frame, text="Telephone Directory", font=("roboto", 24))
 label.pack(pady=12, padx=10)
 
 # do a dropdown menu of surnames
@@ -276,8 +276,10 @@ textbox = customtkinter.CTkTextbox(
     master=frame, width=1000, height=250, font=("Consolas", 14))
 textbox.place(relx=0.5, rely=0.95, anchor="s")
 
+peopleFounded = []
 # create a button to show all the people
 def show_people():
+    peopleFounded.clear()
     textbox.configure(state="normal")
     with connection.cursor() as cursor:
         cursor.execute("SELECT * FROM main")
@@ -318,15 +320,9 @@ def show_people():
             spacesAfterFlat = 10 - len(str(people[i][7]))
 
             textbox.insert("end", f"{surname} {name} {otchestvo} {street} {people[i][5]} {people[i][6]} {people[i][7]}" + spacesAfterFlat*" " + f"{people[i][8]}\n")
-    
+            peopleFounded.append([surname, name, otchestvo, street, people[i][5], people[i][6], people[i][7], people[i][8]])
     textbox.configure(state="disabled")
 
-
-show_people_button = customtkinter.CTkButton(
-    master=frame, text="Show all", command=show_people)
-show_people_button.place(relx=0.33, rely=0.45)
-
-peopleFounded = []
 # create search button
 def search():
     peopleFounded.clear()
@@ -343,7 +339,7 @@ def search():
 
     # if all the fields are empty show popup message
     if surname == "Select surname" and name == "Select name" and otchestvo == "Select otchestvo" and street == "Select street" and house == "" and korpus == "" and flat == "" and phone == "":
-        popupmsg("Fill at least one field")
+        show_people()
         return
 
     with connection.cursor() as cursor:
@@ -434,12 +430,13 @@ def search():
 
 search_button = customtkinter.CTkButton(
     master=frame, text="Search", command=search)
-search_button.place(relx=0.57, rely=0.45)
+search_button.place(relx=0.33, rely=0.45)
 
 def delete():
     global peopleFounded
     global textbox
     global connection
+    global surname_entry, name_entry, otchestvo_entry, street_entry, house_entry, korpus_entry, flat_entry, phone_entry
 
     if len(peopleFounded) == 0:
         popupmsg("No results found")
@@ -491,7 +488,229 @@ def delete():
 # create button to delete selected row
 delete_button = customtkinter.CTkButton(
     master=frame, text="Delete", command=delete)
-delete_button.place(relx=0.8, rely=0.45)
+delete_button.place(relx=0.57, rely=0.45)
+
+def cancel():
+    # close the edit window
+    global edit_window
+    edit_window.destroy()
+
+def update_person():
+    # get the person from the fields update the person in the database
+    global peopleFounded
+    global connection
+    global surname_entry, name_entry, otchestvo_entry, street_entry, dom_entry, korpus_entry, kvartira_entry, telephone_entry
+
+    person_was = peopleFounded[0]
+    person_new = [surname_entry.get(), name_entry.get(), otchestvo_entry.get(), street_entry.get(), dom_entry.get(), korpus_entry.get(), kvartira_entry.get(), telephone_entry.get()]
+    with connection.cursor() as cursor:
+        # get the id of the surname from fam table
+        cursor.execute(f"SELECT f_id FROM fam WHERE f_val = '{person_new[0]}'")
+        surname_id_new = cursor.fetchall()
+        if len(surname_id_new) == 0: # if we changed the surname to an unknown one
+            cursor.execute(f"INSERT INTO fam (f_id, f_val) VALUES (default, '{person_new[0]}')")
+            connection.commit()
+            cursor.execute(f"SELECT f_id FROM fam WHERE f_val = '{person_new[0]}'")
+            surname_id_new = cursor.fetchone()[0]
+        else:
+            surname_id_new = surname_id_new[0][0]
+
+        cursor.execute(f"SELECT f_id FROM fam WHERE f_val='{person_was[0]}'")
+        surname_id_was = cursor.fetchone()[0]
+
+        # get the id of the name from names table
+        cursor.execute(f"SELECT n_id FROM names WHERE n_val = '{person_new[1]}'")
+        name_id_new = cursor.fetchall()
+        if len(name_id_new) == 0: # if we changed the name to an unknown one
+            cursor.execute(f"INSERT INTO names (n_id, n_val) VALUES (default, '{person_new[1]}')")
+            connection.commit()
+            cursor.execute(f"SELECT n_id FROM names WHERE n_val = '{person_new[1]}'")
+            name_id_new = cursor.fetchone()[0]
+        else:
+            name_id_new = name_id_new[0][0]
+
+        cursor.execute(f"SELECT n_id FROM names WHERE n_val='{person_was[1]}'")
+        name_id_was = cursor.fetchone()[0]
+
+        # get the id of the otchestvo from otch table
+        cursor.execute(f"SELECT o_id FROM otch WHERE o_value = '{person_new[2]}'")
+        otchestvo_id_new = cursor.fetchall()
+        if len(otchestvo_id_new) == 0: # if we changed the otchestvo to an unknown one
+            cursor.execute(f"INSERT INTO otch (o_id, o_value) VALUES (default, '{person_new[2]}')")
+            connection.commit()
+            cursor.execute(f"SELECT o_id FROM otch WHERE o_value = '{person_new[2]}'")
+            otchestvo_id_new = cursor.fetchone()[0]
+        else:
+            otchestvo_id_new = otchestvo_id_new[0][0]
+
+        cursor.execute(f"SELECT o_id FROM otch WHERE o_value='{person_was[2]}'")
+        otchestvo_id_was = cursor.fetchone()[0]
+
+        # get the id of the street from street table
+        cursor.execute(f"SELECT s_id FROM street WHERE s_val = '{person_new[3]}'")
+        street_id_new = cursor.fetchall()
+        if len(street_id_new) == 0: # if we changed the street to an unknown one
+            cursor.execute(f"INSERT INTO street (s_id, s_val) VALUES (default, '{person_new[3]}')")
+            connection.commit()
+            cursor.execute(f"SELECT s_id FROM street WHERE s_val = '{person_new[3]}'")
+            street_id_new = cursor.fetchone()[0]
+        else:
+            street_id_new = street_id_new[0][0]
+
+        cursor.execute(f"SELECT s_id FROM street WHERE s_val='{person_was[3]}'")
+        street_id_was = cursor.fetchone()[0]
+
+        request = f"UPDATE main SET fam={surname_id_new}, name={name_id_new}, otchestvo={otchestvo_id_new}, street={street_id_new}, dom='{person_new[4]}', korpus='{person_new[5]}', kvartira={person_new[6]}, telephone='{person_new[7]}' WHERE fam={surname_id_was} AND name={name_id_was} AND otchestvo={otchestvo_id_was} AND street={street_id_was} AND dom='{person_was[4]}' AND korpus='{person_was[5]}' AND kvartira={person_was[6]} AND telephone='{person_was[7]}'"
+        print(request)
+        cursor.execute(request)
+        connection.commit()
+
+        # delete the old surname from fam table if it is not used anymore        
+        cursor.execute(f"SELECT * FROM main WHERE fam={surname_id_was}")
+        surname_id_used = cursor.fetchall()
+        if len(surname_id_used) == 0:
+            cursor.execute(f"DELETE FROM fam WHERE f_id={surname_id_was}")
+            connection.commit()
+            print("Surname deleted")
+        
+        # delete the old name from names table if it is not used anymore
+        cursor.execute(f"SELECT * FROM main WHERE name={name_id_was}")
+        name_id_used = cursor.fetchall()
+        if len(name_id_used) == 0:
+            cursor.execute(f"DELETE FROM names WHERE n_id={name_id_was}")
+            connection.commit()
+            print("Name deleted")
+        
+        # delete the old otchestvo from otch table if it is not used anymore
+        cursor.execute(f"SELECT * FROM main WHERE otchestvo={otchestvo_id_was}")
+        otchestvo_id_used = cursor.fetchall()
+        if len(otchestvo_id_used) == 0:
+            cursor.execute(f"DELETE FROM otch WHERE o_id={otchestvo_id_was}")
+            connection.commit()
+            print("Otchestvo deleted")
+        
+        # delete the old street from street table if it is not used anymore
+        cursor.execute(f"SELECT * FROM main WHERE street={street_id_was}")
+        street_id_used = cursor.fetchall()
+        if len(street_id_used) == 0:
+            cursor.execute(f"DELETE FROM street WHERE s_id={street_id_was}")
+            connection.commit()
+            print("Street deleted")
+
+
+    popupmsg("Person edited successfully")
+    dropdown_fill()
+    cancel()
+
+def edit():
+    global peopleFounded
+    global connection
+
+    if len(peopleFounded) == 0:
+        popupmsg("No results found")
+        return
+    
+    if len(peopleFounded) > 1:
+        popupmsg("Please select only one person")
+        return
+
+    # get the selected person
+    person = peopleFounded[0]
+
+    # get the id of the surname from fam table
+    with connection.cursor() as cursor:
+        cursor.execute(f"SELECT f_id FROM fam WHERE f_val = '{person[0]}'")
+        surname_id = cursor.fetchall()
+        surname_id = surname_id[0][0] if len(surname_id) > 0 else 0
+
+        # get the id of the name from names table
+        cursor.execute(f"SELECT n_id FROM names WHERE n_val = '{person[1]}'")
+        name_id = cursor.fetchall()
+        name_id = name_id[0][0] if len(name_id) > 0 else 0
+
+        # get the id of the otchestvo from otch table
+        cursor.execute(f"SELECT o_id FROM otch WHERE o_value = '{person[2]}'")
+        otchestvo_id = cursor.fetchall()
+        otchestvo_id = otchestvo_id[0][0] if len(otchestvo_id) > 0 else 0
+
+        # get the id of the street from street table
+        cursor.execute(f"SELECT s_id FROM street WHERE s_val = '{person[3]}'")
+        street_id = cursor.fetchall()
+        street_id = street_id[0][0] if len(street_id) > 0 else 0
+
+    # open edit window
+    global edit_window
+    edit_window = customtkinter.CTkToplevel()
+    edit_window.title("Edit")
+    edit_window.geometry("900x250")
+    edit_window.resizable(False, False)
+
+    # create frame
+    edit_frame = customtkinter.CTkFrame(master=edit_window)
+    edit_frame.place(relwidth=1, relheight=1)
+
+    # create surname entry
+    global surname_entry
+    surname_entry = customtkinter.CTkEntry(master=edit_frame)
+    surname_entry.insert(0, person[0])
+    surname_entry.place(relx=0.1, rely=0.1, relwidth=0.13, relheight=0.13)
+
+    # create name entry
+    global name_entry
+    name_entry = customtkinter.CTkEntry(master=edit_frame)
+    name_entry.insert(0, person[1])
+    name_entry.place(relx=0.33, rely=0.1, relwidth=0.13, relheight=0.13)
+
+    # create otchestvo entry
+    global otchestvo_entry
+    otchestvo_entry = customtkinter.CTkEntry(master=edit_frame)
+    otchestvo_entry.insert(0, person[2])
+    otchestvo_entry.place(relx=0.57, rely=0.1, relwidth=0.13, relheight=0.13)
+
+    # create street entry   
+    global street_entry
+    street_entry = customtkinter.CTkEntry(master=edit_frame)
+    street_entry.insert(0, person[3])
+    street_entry.place(relx=0.8, rely=0.1, relwidth=0.13, relheight=0.13)
+
+    # create dom entry  
+    global dom_entry
+    dom_entry = customtkinter.CTkEntry(master=edit_frame)
+    dom_entry.insert(0, person[4])
+    dom_entry.place(relx=0.1, rely=0.3, relwidth=0.13, relheight=0.13)
+
+    # create korpus entry
+    global korpus_entry
+    korpus_entry = customtkinter.CTkEntry(master=edit_frame)
+    korpus_entry.insert(0, person[5])
+    korpus_entry.place(relx=0.33, rely=0.3, relwidth=0.13, relheight=0.13)
+
+    # create kvartira entry
+    global kvartira_entry
+    kvartira_entry = customtkinter.CTkEntry(master=edit_frame)
+    kvartira_entry.insert(0, person[6])
+    kvartira_entry.place(relx=0.57, rely=0.3, relwidth=0.13, relheight=0.13)
+
+    # create telephone entry
+    global telephone_entry
+    telephone_entry = customtkinter.CTkEntry(master=edit_frame)
+    telephone_entry.insert(0, person[7])
+    telephone_entry.place(relx=0.8, rely=0.3, relwidth=0.13, relheight=0.13)
+
+    # create button to save changes
+    save_button = customtkinter.CTkButton(
+        master=edit_frame, text="Save", command=update_person)
+    save_button.place(relx=0.57, rely=0.7)
+
+    # create button to cancel changes
+    cancel_button = customtkinter.CTkButton(
+        master=edit_frame, text="Cancel", command=cancel)
+    cancel_button.place(relx=0.3, rely=0.7)
+
+# create button to edit selected row
+edit_button = customtkinter.CTkButton(
+    master=frame, text="Edit", command=edit)
+edit_button.place(relx=0.8, rely=0.45)
 
 
 root.mainloop()
