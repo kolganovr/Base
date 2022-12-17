@@ -165,6 +165,11 @@ def dropdown_fill():
     selected_otchestvo.set("Select otchestvo")
     selected_street.set("Select street")
 
+    surname_dropdown.configure(values=get_surnames())
+    name_dropdown.configure(values=get_names())
+    otchestvo_dropdown.configure(values=get_otchestva())
+    street_dropdown.configure(values=get_streets())
+
 dropdown_fill()
 
 
@@ -336,10 +341,12 @@ def show_people():
 
 show_people_button = customtkinter.CTkButton(
     master=frame, text="Show all", command=show_people)
-show_people_button.place(relx=0.57, rely=0.45)
+show_people_button.place(relx=0.33, rely=0.45)
 
+peopleFounded = []
 # create search button
 def search():
+    peopleFounded.clear()
     textbox.configure(state="normal")
     textbox.delete(1.0, "end")
     surname = surname_dropdown.get()
@@ -428,6 +435,9 @@ def search():
                 if streets[j][0] == peopleFound[i][4]:
                     street = streets[j][1]
 
+            # add person info into peopleFounded list
+            peopleFounded.append([surname, name, otchestvo, street, peopleFound[i][5], peopleFound[i][6], peopleFound[i][7], peopleFound[i][8]])
+
             surname = surname.ljust(15)
             name = name.ljust(15)
             otchestvo = otchestvo.ljust(17)
@@ -435,12 +445,70 @@ def search():
             
             spacesAfterFlat = 10 - len(str(peopleFound[i][7]))
             textbox.insert("end", f"{surname} {name} {otchestvo} {street} {peopleFound[i][5]} {peopleFound[i][6]} {peopleFound[i][7]}" + spacesAfterFlat*" " + f"{peopleFound[i][8]}\n")
+        
     textbox.configure(state="disabled")
     dropdown_fill()
 
 search_button = customtkinter.CTkButton(
     master=frame, text="Search", command=search)
-search_button.place(relx=0.33, rely=0.45)
+search_button.place(relx=0.57, rely=0.45)
+
+def delete():
+    global peopleFounded
+    global textbox
+    global connection
+
+    if len(peopleFounded) == 0:
+        popupmsg("No results found")
+        return
+
+    with connection.cursor() as cursor:
+        for person in peopleFounded:
+
+            # get the id of the surname from fam table
+            cursor.execute(f"SELECT f_id FROM fam WHERE f_val = '{person[0]}'")
+            surname_id = cursor.fetchall()
+            surname_id = surname_id[0][0] if len(surname_id) > 0 else 0
+
+            # get the id of the name from names table
+            cursor.execute(f"SELECT n_id FROM names WHERE n_val = '{person[1]}'")
+            name_id = cursor.fetchall()
+            name_id = name_id[0][0] if len(name_id) > 0 else 0
+
+            # get the id of the otchestvo from otch table
+            cursor.execute(f"SELECT o_id FROM otch WHERE o_value = '{person[2]}'")
+            otchestvo_id = cursor.fetchall()
+            otchestvo_id = otchestvo_id[0][0] if len(otchestvo_id) > 0 else 0
+
+            # get the id of the street from street table
+            cursor.execute(f"SELECT s_id FROM street WHERE s_val = '{person[3]}'")
+            street_id = cursor.fetchall()
+            street_id = street_id[0][0] if len(street_id) > 0 else 0
+
+            request = f"DELETE FROM main WHERE fam={surname_id} AND name={name_id} AND otchestvo={otchestvo_id} AND street={street_id} AND dom='{person[4]}' AND korpus='{person[5]}' AND kvartira={person[6]} AND telephone='{person[7]}'"
+            print(request)
+            cursor.execute(request)
+            connection.commit()
+
+            # delete person surname from fam table if it is not used anymore
+            cursor.execute(f"SELECT * FROM main WHERE fam={surname_id}")
+            surname_id_used = cursor.fetchall()
+            if len(surname_id_used) == 0:
+                cursor.execute(f"DELETE FROM fam WHERE f_id={surname_id}")
+                connection.commit()
+
+    textbox.configure(state="normal")
+    textbox.delete(1.0, "end")
+    textbox.configure(state="disabled")
+
+    peopleFounded = []
+    popupmsg("Deleted")
+    dropdown_fill()
+
+# create button to delete selected row
+delete_button = customtkinter.CTkButton(
+    master=frame, text="Delete", command=delete)
+delete_button.place(relx=0.8, rely=0.45)
 
 
 root.mainloop()

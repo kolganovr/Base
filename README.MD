@@ -39,7 +39,7 @@ This code connects to a PostgreSQL database, gets data from four different table
 
 - Can show a list of all people in the database.
 
-- *(In progress) Can delete a person from the database.*
+- Can delete a people from the database.
 
   
 
