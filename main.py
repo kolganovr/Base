@@ -1,5 +1,4 @@
 import customtkinter
-import sys
 
 # import libraries to connect to postrgeSQL database
 import psycopg2
@@ -58,15 +57,21 @@ def get_streets():
 
 
 # ui
+# Setting the appearance mode to dark
 customtkinter.set_appearance_mode("dark")
+
+# Setting the default color theme to dark-blue
 customtkinter.set_default_color_theme("dark-blue")
 
+# Creating the main window
 root = customtkinter.CTk()
 root.geometry("1280x720")
 
+# Creating a frame inside the main window
 frame = customtkinter.CTkFrame(master=root)
 frame.pack(pady=20, padx=20, fill="both", expand=True)
 
+# Creating a label inside the main window
 label = customtkinter.CTkLabel(master=frame, text="Telephone Directory", font=("roboto", 24))
 label.pack(pady=12, padx=10)
 
@@ -99,7 +104,7 @@ street_dropdown = customtkinter.CTkComboBox(master=frame,
 # place it in the next row
 street_dropdown.place(relx=0.8, rely=0.15)
 
-# do a text field for house number
+# text field for house number
 house_number = customtkinter.CTkEntry(
     master=frame, placeholder_text="House number")
 house_number.place(relx=0.1, rely=0.3)
@@ -125,28 +130,28 @@ def dropdown_fill():
     selected_otchestvo.set("Select otchestvo")
     selected_street.set("Select street")
 
-    # write into surnames variable the list of f_val from get_surnames2()
+    # write into surnames variable the list of f_val from get_surnames()
     surnamesWId = get_surnames()
     surnames = []
     for surname in surnamesWId:
         surnames.append(surname[1])
     surname_dropdown.configure(values=surnames)
 
-    # write into names variable the list of n_val from get_names2()
+    # write into names variable the list of n_val from get_names()
     namesWId = get_names()
     names = []
     for name in namesWId:
         names.append(name[1])
     name_dropdown.configure(values=names)
     
-    # write into otchestva variable the list of o_val from get_otchestva2()
+    # write into otchestva variable the list of o_val from get_otchestva()
     otchestvaWId = get_otchestva()
     otchestva = []
     for otchestvo in otchestvaWId:
         otchestva.append(otchestvo[1])
     otchestvo_dropdown.configure(values=otchestva)
     
-    # write into streets variable the list of s_val from get_streets2()
+    # write into streets variable the list of s_val from get_streets()
     streetsWId = get_streets()
     streets = []
     for street in streetsWId:
@@ -179,6 +184,11 @@ def add_person():
     korpus = korpus_number.get()
     flat = flat_number.get()
     phone = phone_number.get()
+
+    # if any of the fields are empty, don't add the person
+    if surname == "" or name == "" or otchestvo == "" or street == "" or house == "" or korpus == "" or flat == "" or phone == "":
+        popupmsg("Fill all the fields")
+        return
 
     with connection.cursor() as cursor:
         # if the surname is not in the database, add it
@@ -244,6 +254,7 @@ def add_person():
     popupmsg("Person added")
 
 
+
 def popupmsg(msg):
     # animate bacgr frame to change position from rely 1.1 to rely 0.95 and then back to rely 1.1
     backgr = customtkinter.CTkFrame(
@@ -266,12 +277,13 @@ def popupmsg(msg):
     backgr.destroy()
 
 
+
 add_person_button = customtkinter.CTkButton(
     master=frame, text="Add person", command=add_person)
 add_person_button.place(relx=0.1, rely=0.45)
 
 
-# create a textbox to show all the people
+# textbox to show all the people
 textbox = customtkinter.CTkTextbox(
     master=frame, width=1000, height=250, font=("Consolas", 14))
 textbox.place(relx=0.5, rely=0.95, anchor="s")

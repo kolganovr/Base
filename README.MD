@@ -53,3 +53,5 @@ This code connects to a PostgreSQL database, gets data from four different table
 - The dropdown menus are created using the `CTkComboBox` class from the `customtkinter` library.
 
 - When user updates a person's information, the `update_person` function is called. It updates the person's information in the database and then if the person's surname, name, or otchestvo has changed, it updates the person's information in the `fam`, `names`, `otch`, and `street` tables (including deleting of unused rows).
+
+- Main table consists of 8 columns: `id`, `fam`, `name`, `otch`, `street`, `house`, `flat`, `phone`,
