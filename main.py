@@ -31,6 +31,7 @@ def get_surnames():
         surnames = [(surname[0], surname[1].strip()) for surname in surnames]
         return surnames
 
+
 def get_names():
     with connection.cursor() as cursor:
         cursor.execute("SELECT n_id, n_val FROM names")
@@ -39,13 +40,16 @@ def get_names():
         names = [(name[0], name[1].strip()) for name in names]
         return names
 
+
 def get_otchestva():
     with connection.cursor() as cursor:
         cursor.execute("SELECT o_id, o_value FROM otch")
         otchestva = cursor.fetchall()
         # delete all spaces after each otchestvo and save o_id and o_value
-        otchestva = [(otchestvo[0], otchestvo[1].strip()) for otchestvo in otchestva]
+        otchestva = [(otchestvo[0], otchestvo[1].strip())
+                     for otchestvo in otchestva]
         return otchestva
+
 
 def get_streets():
     with connection.cursor() as cursor:
@@ -66,34 +70,36 @@ customtkinter.set_default_color_theme("dark-blue")
 # Creating the main window
 root = customtkinter.CTk()
 root.geometry("1280x720")
+root.title("Telephone Directory")
 
 # Creating a frame inside the main window
 frame = customtkinter.CTkFrame(master=root)
 frame.pack(pady=20, padx=20, fill="both", expand=True)
 
 # Creating a label inside the main window
-label = customtkinter.CTkLabel(master=frame, text="Telephone Directory", font=("roboto", 24))
+label = customtkinter.CTkLabel(
+    master=frame, text="Telephone Directory", font=("roboto", 24))
 label.pack(pady=12, padx=10)
 
 # do a dropdown menu of surnames
 selected_surname = customtkinter.StringVar()
 
 surname_dropdown = customtkinter.CTkComboBox(master=frame,
-                                                variable=selected_surname)
+                                             variable=selected_surname)
 surname_dropdown.place(relx=0.1, rely=0.15)
 
 # do a dropdown menu of names
 selected_name = customtkinter.StringVar()
 
 name_dropdown = customtkinter.CTkComboBox(master=frame,
-                                            variable=selected_name)
+                                          variable=selected_name)
 name_dropdown.place(relx=0.33, rely=0.15)
 
 # do a dropdown menu of otchestva
 selected_otchestvo = customtkinter.StringVar()
 
 otchestvo_dropdown = customtkinter.CTkComboBox(master=frame,
-                                                variable=selected_otchestvo)
+                                               variable=selected_otchestvo)
 otchestvo_dropdown.place(relx=0.57, rely=0.15)
 
 # do a dropdown menu of streets
@@ -143,20 +149,21 @@ def dropdown_fill():
     for name in namesWId:
         names.append(name[1])
     name_dropdown.configure(values=names)
-    
+
     # write into otchestva variable the list of o_val from get_otchestva()
     otchestvaWId = get_otchestva()
     otchestva = []
     for otchestvo in otchestvaWId:
         otchestva.append(otchestvo[1])
     otchestvo_dropdown.configure(values=otchestva)
-    
+
     # write into streets variable the list of s_val from get_streets()
     streetsWId = get_streets()
     streets = []
     for street in streetsWId:
         streets.append(street[1])
     street_dropdown.configure(values=streets)
+
 
 dropdown_fill()
 
@@ -254,7 +261,6 @@ def add_person():
     popupmsg("Person added")
 
 
-
 def popupmsg(msg):
     # animate bacgr frame to change position from rely 1.1 to rely 0.95 and then back to rely 1.1
     backgr = customtkinter.CTkFrame(
@@ -277,7 +283,6 @@ def popupmsg(msg):
     backgr.destroy()
 
 
-
 add_person_button = customtkinter.CTkButton(
     master=frame, text="Add person", command=add_person)
 add_person_button.place(relx=0.1, rely=0.45)
@@ -290,6 +295,8 @@ textbox.place(relx=0.5, rely=0.95, anchor="s")
 
 peopleFounded = []
 # create a button to show all the people
+
+
 def show_people():
     peopleFounded.clear()
     textbox.configure(state="normal")
@@ -308,17 +315,17 @@ def show_people():
             for j in range(len(surnames)):
                 if surnames[j][0] == people[i][1]:
                     surname = surnames[j][1]
-                    
+
             name = ""
             for j in range(len(names)):
                 if names[j][0] == people[i][2]:
                     name = names[j][1]
-                    
+
             otchestvo = ""
             for j in range(len(otchestva)):
                 if otchestva[j][0] == people[i][3]:
                     otchestvo = otchestva[j][1]
-                    
+
             street = ""
             for j in range(len(streets)):
                 if streets[j][0] == people[i][4]:
@@ -328,14 +335,18 @@ def show_people():
             name = name.ljust(15)
             otchestvo = otchestvo.ljust(17)
             street = street.ljust(20)
-            
+
             spacesAfterFlat = 10 - len(str(people[i][7]))
 
-            textbox.insert("end", f"{surname} {name} {otchestvo} {street} {people[i][5]} {people[i][6]} {people[i][7]}" + spacesAfterFlat*" " + f"{people[i][8]}\n")
-            peopleFounded.append([surname, name, otchestvo, street, people[i][5], people[i][6], people[i][7], people[i][8]])
+            textbox.insert(
+                "end", f"{surname} {name} {otchestvo} {street} {people[i][5]} {people[i][6]} {people[i][7]}" + spacesAfterFlat*" " + f"{people[i][8]}\n")
+            peopleFounded.append([surname, name, otchestvo, street,
+                                 people[i][5], people[i][6], people[i][7], people[i][8]])
     textbox.configure(state="disabled")
 
 # create search button
+
+
 def search():
     peopleFounded.clear()
     textbox.configure(state="normal")
@@ -349,7 +360,7 @@ def search():
     flat = flat_number.get()
     phone = phone_number.get()
 
-    # if all the fields are empty show popup message
+    # if all the fields are empty show all people
     if surname == "Select surname" and name == "Select name" and otchestvo == "Select otchestvo" and street == "Select street" and house == "" and korpus == "" and flat == "" and phone == "":
         show_people()
         return
@@ -379,20 +390,26 @@ def search():
         request += f"fam={surname_id}" if surname != "Select surname" else ""
         request += " AND " if surname != "Select surname" and name != "Select name" else ""
         request += f"name={name_id}" if name != "Select name" else ""
-        request += " AND " if (surname != "Select surname" or name != "Select name") and otchestvo != "Select otchestvo" else ""
+        request += " AND " if (surname != "Select surname" or name !=
+                               "Select name") and otchestvo != "Select otchestvo" else ""
         request += f"otchestvo={otchestvo_id}" if otchestvo != "Select otchestvo" else ""
-        request += " AND " if (surname != "Select surname" or name != "Select name" or otchestvo != "Select otchestvo") and street != "Select street" else ""
+        request += " AND " if (surname != "Select surname" or name != "Select name" or otchestvo !=
+                               "Select otchestvo") and street != "Select street" else ""
         request += f"street={street_id}" if street != "Select street" else ""
-        request += " AND " if (surname != "Select surname" or name != "Select name" or otchestvo != "Select otchestvo" or street != "Select street") and house != "" else ""
+        request += " AND " if (surname != "Select surname" or name != "Select name" or otchestvo !=
+                               "Select otchestvo" or street != "Select street") and house != "" else ""
         request += f"dom='{house}'" if house != "" else ""
-        request += " AND " if (surname != "Select surname" or name != "Select name" or otchestvo != "Select otchestvo" or street != "Select street" or house != "") and korpus != "" else ""
+        request += " AND " if (surname != "Select surname" or name != "Select name" or otchestvo !=
+                               "Select otchestvo" or street != "Select street" or house != "") and korpus != "" else ""
         request += f"korpus='{korpus}'" if korpus != "" else ""
-        request += " AND " if (surname != "Select surname" or name != "Select name" or otchestvo != "Select otchestvo" or street != "Select street" or house != "" or korpus != "") and flat != "" else ""
+        request += " AND " if (surname != "Select surname" or name != "Select name" or otchestvo !=
+                               "Select otchestvo" or street != "Select street" or house != "" or korpus != "") and flat != "" else ""
         request += f"kvartira={flat}" if flat != "" else ""
-        request += " AND " if (surname != "Select surname" or name != "Select name" or otchestvo != "Select otchestvo" or street != "Select street" or house != "" or korpus != "" or flat != "") and phone != "" else ""
+        request += " AND " if (surname != "Select surname" or name != "Select name" or otchestvo != "Select otchestvo" or street !=
+                               "Select street" or house != "" or korpus != "" or flat != "") and phone != "" else ""
         request += f"telephone='{phone}'" if phone != "" else ""
         print(request)
-        
+
         cursor.execute(request)
         peopleFound = cursor.fetchall()
         if len(peopleFound) == 0:
@@ -410,39 +427,43 @@ def search():
             for j in range(len(surnames)):
                 if surnames[j][0] == peopleFound[i][1]:
                     surname = surnames[j][1]
-                    
+
             name = ""
             for j in range(len(names)):
                 if names[j][0] == peopleFound[i][2]:
                     name = names[j][1]
-                    
+
             otchestvo = ""
             for j in range(len(otchestva)):
                 if otchestva[j][0] == peopleFound[i][3]:
                     otchestvo = otchestva[j][1]
-                    
+
             street = ""
             for j in range(len(streets)):
                 if streets[j][0] == peopleFound[i][4]:
                     street = streets[j][1]
 
             # add person info into peopleFounded list
-            peopleFounded.append([surname, name, otchestvo, street, peopleFound[i][5], peopleFound[i][6], peopleFound[i][7], peopleFound[i][8]])
+            peopleFounded.append([surname, name, otchestvo, street, peopleFound[i]
+                                 [5], peopleFound[i][6], peopleFound[i][7], peopleFound[i][8]])
 
             surname = surname.ljust(15)
             name = name.ljust(15)
             otchestvo = otchestvo.ljust(17)
             street = street.ljust(20)
-            
+
             spacesAfterFlat = 10 - len(str(peopleFound[i][7]))
-            textbox.insert("end", f"{surname} {name} {otchestvo} {street} {peopleFound[i][5]} {peopleFound[i][6]} {peopleFound[i][7]}" + spacesAfterFlat*" " + f"{peopleFound[i][8]}\n")
-        
+            textbox.insert(
+                "end", f"{surname} {name} {otchestvo} {street} {peopleFound[i][5]} {peopleFound[i][6]} {peopleFound[i][7]}" + spacesAfterFlat*" " + f"{peopleFound[i][8]}\n")
+
     textbox.configure(state="disabled")
     dropdown_fill()
+
 
 search_button = customtkinter.CTkButton(
     master=frame, text="Search", command=search)
 search_button.place(relx=0.33, rely=0.45)
+
 
 def delete():
     global peopleFounded
@@ -462,17 +483,20 @@ def delete():
             surname_id = surname_id[0][0] if len(surname_id) > 0 else 0
 
             # get the id of the name from names table
-            cursor.execute(f"SELECT n_id FROM names WHERE n_val = '{person[1]}'")
+            cursor.execute(
+                f"SELECT n_id FROM names WHERE n_val = '{person[1]}'")
             name_id = cursor.fetchall()
             name_id = name_id[0][0] if len(name_id) > 0 else 0
 
             # get the id of the otchestvo from otch table
-            cursor.execute(f"SELECT o_id FROM otch WHERE o_value = '{person[2]}'")
+            cursor.execute(
+                f"SELECT o_id FROM otch WHERE o_value = '{person[2]}'")
             otchestvo_id = cursor.fetchall()
             otchestvo_id = otchestvo_id[0][0] if len(otchestvo_id) > 0 else 0
 
             # get the id of the street from street table
-            cursor.execute(f"SELECT s_id FROM street WHERE s_val = '{person[3]}'")
+            cursor.execute(
+                f"SELECT s_id FROM street WHERE s_val = '{person[3]}'")
             street_id = cursor.fetchall()
             street_id = street_id[0][0] if len(street_id) > 0 else 0
 
@@ -487,21 +511,22 @@ def delete():
             if len(surname_id_used) == 0:
                 cursor.execute(f"DELETE FROM fam WHERE f_id={surname_id}")
                 connection.commit()
-            
+
             # delete person name from names table if it is not used anymore
             cursor.execute(f"SELECT * FROM main WHERE name={name_id}")
             name_id_used = cursor.fetchall()
             if len(name_id_used) == 0:
                 cursor.execute(f"DELETE FROM names WHERE n_id={name_id}")
                 connection.commit()
-            
+
             # delete person otchestvo from otch table if it is not used anymore
-            cursor.execute(f"SELECT * FROM main WHERE otchestvo={otchestvo_id}")
+            cursor.execute(
+                f"SELECT * FROM main WHERE otchestvo={otchestvo_id}")
             otchestvo_id_used = cursor.fetchall()
             if len(otchestvo_id_used) == 0:
                 cursor.execute(f"DELETE FROM otch WHERE o_id={otchestvo_id}")
                 connection.commit()
-            
+
             # delete person street from street table if it is not used anymore
             cursor.execute(f"SELECT * FROM main WHERE street={street_id}")
             street_id_used = cursor.fetchall()
@@ -517,15 +542,18 @@ def delete():
     popupmsg("Deleted")
     dropdown_fill()
 
+
 # create button to delete selected row
 delete_button = customtkinter.CTkButton(
     master=frame, text="Delete", command=delete)
 delete_button.place(relx=0.57, rely=0.45)
 
+
 def cancel():
     # close the edit window
     global edit_window
     edit_window.destroy()
+
 
 def update_person():
     # get the person from the fields update the person in the database
@@ -534,15 +562,18 @@ def update_person():
     global surname_entry, name_entry, otchestvo_entry, street_entry, dom_entry, korpus_entry, kvartira_entry, telephone_entry
 
     person_was = peopleFounded[0]
-    person_new = [surname_entry.get(), name_entry.get(), otchestvo_entry.get(), street_entry.get(), dom_entry.get(), korpus_entry.get(), kvartira_entry.get(), telephone_entry.get()]
+    person_new = [surname_entry.get(), name_entry.get(), otchestvo_entry.get(), street_entry.get(
+    ), dom_entry.get(), korpus_entry.get(), kvartira_entry.get(), telephone_entry.get()]
     with connection.cursor() as cursor:
         # get the id of the surname from fam table
         cursor.execute(f"SELECT f_id FROM fam WHERE f_val = '{person_new[0]}'")
         surname_id_new = cursor.fetchall()
-        if len(surname_id_new) == 0: # if we changed the surname to an unknown one
-            cursor.execute(f"INSERT INTO fam (f_id, f_val) VALUES (default, '{person_new[0]}')")
+        if len(surname_id_new) == 0:  # if we changed the surname to an unknown one
+            cursor.execute(
+                f"INSERT INTO fam (f_id, f_val) VALUES (default, '{person_new[0]}')")
             connection.commit()
-            cursor.execute(f"SELECT f_id FROM fam WHERE f_val = '{person_new[0]}'")
+            cursor.execute(
+                f"SELECT f_id FROM fam WHERE f_val = '{person_new[0]}'")
             surname_id_new = cursor.fetchone()[0]
         else:
             surname_id_new = surname_id_new[0][0]
@@ -551,12 +582,15 @@ def update_person():
         surname_id_was = cursor.fetchone()[0]
 
         # get the id of the name from names table
-        cursor.execute(f"SELECT n_id FROM names WHERE n_val = '{person_new[1]}'")
+        cursor.execute(
+            f"SELECT n_id FROM names WHERE n_val = '{person_new[1]}'")
         name_id_new = cursor.fetchall()
-        if len(name_id_new) == 0: # if we changed the name to an unknown one
-            cursor.execute(f"INSERT INTO names (n_id, n_val) VALUES (default, '{person_new[1]}')")
+        if len(name_id_new) == 0:  # if we changed the name to an unknown one
+            cursor.execute(
+                f"INSERT INTO names (n_id, n_val) VALUES (default, '{person_new[1]}')")
             connection.commit()
-            cursor.execute(f"SELECT n_id FROM names WHERE n_val = '{person_new[1]}'")
+            cursor.execute(
+                f"SELECT n_id FROM names WHERE n_val = '{person_new[1]}'")
             name_id_new = cursor.fetchone()[0]
         else:
             name_id_new = name_id_new[0][0]
@@ -565,31 +599,39 @@ def update_person():
         name_id_was = cursor.fetchone()[0]
 
         # get the id of the otchestvo from otch table
-        cursor.execute(f"SELECT o_id FROM otch WHERE o_value = '{person_new[2]}'")
+        cursor.execute(
+            f"SELECT o_id FROM otch WHERE o_value = '{person_new[2]}'")
         otchestvo_id_new = cursor.fetchall()
-        if len(otchestvo_id_new) == 0: # if we changed the otchestvo to an unknown one
-            cursor.execute(f"INSERT INTO otch (o_id, o_value) VALUES (default, '{person_new[2]}')")
+        if len(otchestvo_id_new) == 0:  # if we changed the otchestvo to an unknown one
+            cursor.execute(
+                f"INSERT INTO otch (o_id, o_value) VALUES (default, '{person_new[2]}')")
             connection.commit()
-            cursor.execute(f"SELECT o_id FROM otch WHERE o_value = '{person_new[2]}'")
+            cursor.execute(
+                f"SELECT o_id FROM otch WHERE o_value = '{person_new[2]}'")
             otchestvo_id_new = cursor.fetchone()[0]
         else:
             otchestvo_id_new = otchestvo_id_new[0][0]
 
-        cursor.execute(f"SELECT o_id FROM otch WHERE o_value='{person_was[2]}'")
+        cursor.execute(
+            f"SELECT o_id FROM otch WHERE o_value='{person_was[2]}'")
         otchestvo_id_was = cursor.fetchone()[0]
 
         # get the id of the street from street table
-        cursor.execute(f"SELECT s_id FROM street WHERE s_val = '{person_new[3]}'")
+        cursor.execute(
+            f"SELECT s_id FROM street WHERE s_val = '{person_new[3]}'")
         street_id_new = cursor.fetchall()
-        if len(street_id_new) == 0: # if we changed the street to an unknown one
-            cursor.execute(f"INSERT INTO street (s_id, s_val) VALUES (default, '{person_new[3]}')")
+        if len(street_id_new) == 0:  # if we changed the street to an unknown one
+            cursor.execute(
+                f"INSERT INTO street (s_id, s_val) VALUES (default, '{person_new[3]}')")
             connection.commit()
-            cursor.execute(f"SELECT s_id FROM street WHERE s_val = '{person_new[3]}'")
+            cursor.execute(
+                f"SELECT s_id FROM street WHERE s_val = '{person_new[3]}'")
             street_id_new = cursor.fetchone()[0]
         else:
             street_id_new = street_id_new[0][0]
 
-        cursor.execute(f"SELECT s_id FROM street WHERE s_val='{person_was[3]}'")
+        cursor.execute(
+            f"SELECT s_id FROM street WHERE s_val='{person_was[3]}'")
         street_id_was = cursor.fetchone()[0]
 
         request = f"UPDATE main SET fam={surname_id_new}, name={name_id_new}, otchestvo={otchestvo_id_new}, street={street_id_new}, dom='{person_new[4]}', korpus='{person_new[5]}', kvartira={person_new[6]}, telephone='{person_new[7]}' WHERE fam={surname_id_was} AND name={name_id_was} AND otchestvo={otchestvo_id_was} AND street={street_id_was} AND dom='{person_was[4]}' AND korpus='{person_was[5]}' AND kvartira={person_was[6]} AND telephone='{person_was[7]}'"
@@ -597,14 +639,14 @@ def update_person():
         cursor.execute(request)
         connection.commit()
 
-        # delete the old surname from fam table if it is not used anymore        
+        # delete the old surname from fam table if it is not used anymore
         cursor.execute(f"SELECT * FROM main WHERE fam={surname_id_was}")
         surname_id_used = cursor.fetchall()
         if len(surname_id_used) == 0:
             cursor.execute(f"DELETE FROM fam WHERE f_id={surname_id_was}")
             connection.commit()
             print("Surname deleted")
-        
+
         # delete the old name from names table if it is not used anymore
         cursor.execute(f"SELECT * FROM main WHERE name={name_id_was}")
         name_id_used = cursor.fetchall()
@@ -612,15 +654,16 @@ def update_person():
             cursor.execute(f"DELETE FROM names WHERE n_id={name_id_was}")
             connection.commit()
             print("Name deleted")
-        
+
         # delete the old otchestvo from otch table if it is not used anymore
-        cursor.execute(f"SELECT * FROM main WHERE otchestvo={otchestvo_id_was}")
+        cursor.execute(
+            f"SELECT * FROM main WHERE otchestvo={otchestvo_id_was}")
         otchestvo_id_used = cursor.fetchall()
         if len(otchestvo_id_used) == 0:
             cursor.execute(f"DELETE FROM otch WHERE o_id={otchestvo_id_was}")
             connection.commit()
             print("Otchestvo deleted")
-        
+
         # delete the old street from street table if it is not used anymore
         cursor.execute(f"SELECT * FROM main WHERE street={street_id_was}")
         street_id_used = cursor.fetchall()
@@ -629,10 +672,10 @@ def update_person():
             connection.commit()
             print("Street deleted")
 
-
     popupmsg("Person edited successfully")
     dropdown_fill()
     cancel()
+
 
 def edit():
     global peopleFounded
@@ -641,7 +684,7 @@ def edit():
     if len(peopleFounded) == 0:
         popupmsg("No results found")
         return
-    
+
     if len(peopleFounded) > 1:
         popupmsg("Please select only one person")
         return
@@ -699,13 +742,13 @@ def edit():
     otchestvo_entry.insert(0, person[2])
     otchestvo_entry.place(relx=0.57, rely=0.1, relwidth=0.13, relheight=0.13)
 
-    # create street entry   
+    # create street entry
     global street_entry
     street_entry = customtkinter.CTkEntry(master=edit_frame)
     street_entry.insert(0, person[3])
     street_entry.place(relx=0.8, rely=0.1, relwidth=0.13, relheight=0.13)
 
-    # create dom entry  
+    # create dom entry
     global dom_entry
     dom_entry = customtkinter.CTkEntry(master=edit_frame)
     dom_entry.insert(0, person[4])
@@ -738,6 +781,7 @@ def edit():
     cancel_button = customtkinter.CTkButton(
         master=edit_frame, text="Cancel", command=cancel)
     cancel_button.place(relx=0.3, rely=0.7)
+
 
 # create button to edit selected row
 edit_button = customtkinter.CTkButton(
